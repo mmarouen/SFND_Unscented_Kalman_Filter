@@ -40,7 +40,12 @@ class UKF {
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
-
+  void GenerateSigmaPoints();
+  void SigmaPointPrediction(double delta_t);
+  void PredictMeanAndCovariance();
+  void UpdateRadar(MeasurementPackage meas_package);
+  void ProcessRadarMeasurement();
+  void UKFRadar(MeasurementPackage meas_package);
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -53,12 +58,17 @@ class UKF {
 
   // state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
   Eigen::VectorXd x_;
+  Eigen::VectorXd z_pred_;
 
   // state covariance matrix
   Eigen::MatrixXd P_;
+  Eigen::MatrixXd S_;
+  Eigen::MatrixXd Zsig_;
 
   // predicted sigma points matrix
+  Eigen::MatrixXd Xsig_aug_;
   Eigen::MatrixXd Xsig_pred_;
+  Eigen::MatrixXd Xsig_pred_aug_; // augmented predicted sigma points
 
   // time when the state is true, in us
   long long time_us_;
@@ -92,6 +102,8 @@ class UKF {
 
   // Augmented state dimension
   int n_aug_;
+
+  int n_z_;
 
   // Sigma point spreading parameter
   double lambda_;

@@ -17,7 +17,7 @@ double Tools::noise(double stddev, long long seedNum)
 }
 
 // sense where a car is located using lidar measurement
-lmarker Tools::lidarSense(Car& car, pcl::visualization::PCLVisualizer::Ptr& viewer, long long timestamp, bool visualize)
+lmarker Tools::lidarSense(Car& car, pcl::visualization::PCLVisualizer::Ptr& viewer, long long timestamp, bool visualize,double dt)
 {
 	MeasurementPackage meas_package;
 	meas_package.sensor_type_ = MeasurementPackage::LASER;
@@ -30,13 +30,14 @@ lmarker Tools::lidarSense(Car& car, pcl::visualization::PCLVisualizer::Ptr& view
     meas_package.raw_measurements_ << marker.x, marker.y;
     meas_package.timestamp_ = timestamp;
 
-    car.ukf.ProcessMeasurement(meas_package);
+	car.ukf.Prediction(dt);
+	car.ukf.UpdateLidar(meas_package);
 
     return marker;
 }
 
 // sense where a car is located using radar measurement
-rmarker Tools::radarSense(Car& car, Car ego, pcl::visualization::PCLVisualizer::Ptr& viewer, long long timestamp, bool visualize)
+rmarker Tools::radarSense(Car& car, Car ego, pcl::visualization::PCLVisualizer::Ptr& viewer, long long timestamp, bool visualize,double dt)
 {
 	double rho = sqrt((car.position.x-ego.position.x)*(car.position.x-ego.position.x)+(car.position.y-ego.position.y)*(car.position.y-ego.position.y));
 	double phi = atan2(car.position.y-ego.position.y,car.position.x-ego.position.x);
@@ -55,8 +56,10 @@ rmarker Tools::radarSense(Car& car, Car ego, pcl::visualization::PCLVisualizer::
     meas_package.raw_measurements_ << marker.rho, marker.phi, marker.rho_dot;
     meas_package.timestamp_ = timestamp;
 
-    car.ukf.ProcessMeasurement(meas_package);
-
+	car.ukf.Prediction(dt);
+    car.ukf.ProcessRadarMeasurement(meas_package);
+	car.ukf.UpdateRadar(meas_package);
+	
     return marker;
 }
 
