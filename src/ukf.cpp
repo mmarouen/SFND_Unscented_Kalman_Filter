@@ -18,25 +18,18 @@ UKF::UKF() {
 
   // initial state vector
   x_ = VectorXd(5);
-  x_ << 20,0,5.0,0.0,0.0;
 
   // initial covariance matrix
   P_ = MatrixXd(5, 5);
-  P_ <<
-      1.0, 0.0, 0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 1.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 1.0;
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
   //std_a_ = 30;
-  std_a_ = 1;
+  std_a_ = 3;
 
 
   // Process noise standard deviation yaw acceleration in rad/s^2
   //std_yawdd_ = 30;
-  std_yawdd_= 0.3;
+  std_yawdd_= 1;
   
   /**
    * DO NOT MODIFY measurement noise values below.
@@ -86,6 +79,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    * measurements.
    */
   if(!is_initialized_){
+    std::cout<<"init"<<std::endl;
     //use first reading as initialization
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       double rho = meas_package.raw_measurements_[0];
@@ -96,15 +90,21 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       double vx = rho_dot * cos(phi);
   	  double vy = rho_dot * sin(phi);
       double v = sqrt(vx * vx + vy * vy);
-      x_ << x, y, v, 0, 0;
-      std::cout<<x<<" "<<y<<" "<<v<<std::endl;
+      if(cos(phi)<0) v*=-1;
+      x_ << x, y, 0, 0, 0;
     } 
     if (meas_package.sensor_type_ == MeasurementPackage::LASER)  {
       double x = meas_package.raw_measurements_[0];
       double y = meas_package.raw_measurements_[1];
-      x_ << x, y, 6, 0, 0;
-      std::cout<<x<<" "<<y<<std::endl;
+      x_ << x, y, 0, 0, 0;
     }
+
+    P_ <<
+        1.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 1.0;
     // initalize time_us
     time_us_ = meas_package.timestamp_ ;
 
@@ -193,8 +193,8 @@ void UKF::SigmaPointPrediction(double delta_t)
 
     // avoid division by zero
     if (fabs(yawd) > 0.001) {
-        px_p = p_x + v/yawd * ( sin (yaw + yawd*delta_t) - sin(yaw));
-        py_p = p_y + v/yawd * ( cos(yaw) - cos(yaw+yawd*delta_t) );
+        px_p = p_x + (v/yawd) * ( sin (yaw + yawd*delta_t) - sin(yaw));
+        py_p = p_y + (v/yawd) * ( cos(yaw) - cos(yaw+yawd*delta_t) );
     } else {
         px_p = p_x + v*delta_t*cos(yaw);
         py_p = p_y + v*delta_t*sin(yaw);
@@ -239,12 +239,14 @@ void UKF::PredictMeanAndCovariance()
 
   // predicted state mean
   x.fill(0.0);
+  //x=x_;
   for (int i = 0; i < 2 * n_aug_ + 1; ++i) {  // iterate over sigma points
     x = x + weights_(i) * Xsig_pred_.col(i);
   }
 
   // predicted state covariance matrix
   P.fill(0.0);
+  //P=P_;
   for (int i = 0; i < 2 * n_aug_ + 1; ++i) {  // iterate over sigma points
     // state difference
     VectorXd x_diff = Xsig_pred_.col(i) - x;
@@ -276,7 +278,8 @@ void UKF::ProcessLidarMeasurement(MeasurementPackage meas_package)
     0.0, std_laspy_*std_laspy_;
 
   PredictLidarMeasurement();
-  UpdateLidar(meas_package);
+  //UpdateLidar(meas_package);
+  UpdateRadar(meas_package);
 
 }
 

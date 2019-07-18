@@ -25,7 +25,7 @@ public:
 	// Parameters 
 	// --------------------------------
 	// Set which cars to track with UKF
-	std::vector<bool> trackCars = {true,false,false};
+	std::vector<bool> trackCars = {true,true,true};
 	// Visualize sensor measurements
 	bool visualize_lidar = true;
 	bool visualize_radar = true;
@@ -118,7 +118,6 @@ public:
 			pcl::PointCloud<pcl::PointXYZ>::Ptr trafficCloud = tools.loadPcd("../src/sensors/data/pcd/highway_"+std::to_string(timestamp)+".pcd");
 			renderPointCloud(viewer, trafficCloud, "trafficCloud", Color((float)184/256,(float)223/256,(float)252/256));
 		}
-		
 
 		// render highway environment with poles
 		renderHighway(egoVelocity*timestamp/1e6, viewer);
@@ -135,8 +134,8 @@ public:
 				VectorXd gt(4);
 				gt << traffic[i].position.x, traffic[i].position.y, traffic[i].velocity*cos(traffic[i].angle), traffic[i].velocity*sin(traffic[i].angle);
 				tools.ground_truth.push_back(gt);
-				tools.lidarSense(traffic[i], viewer, timestamp, visualize_lidar);
 				tools.radarSense(traffic[i], egoCar, viewer, timestamp, visualize_radar);
+				tools.lidarSense(traffic[i], viewer, timestamp, visualize_lidar);
 				tools.ukfResults(traffic[i],viewer, projectedTime, projectedSteps);
 				VectorXd estimate(4);
 				double v  = traffic[i].ukf.x_(2);
@@ -150,8 +149,12 @@ public:
 		}
 		
 		VectorXd gt(4);
-		int k=0;
+		VectorXd gt2(5);
+		int k=1;
 		gt << traffic[k].position.x, traffic[k].position.y, traffic[k].velocity*cos(traffic[k].angle), traffic[k].velocity*sin(traffic[k].angle);
+		gt2 << traffic[k].position.x, traffic[k].position.y, traffic[k].velocity*cos(traffic[k].angle), traffic[k].velocity*sin(traffic[k].angle), traffic[k].angle;
+		VectorXd res(5);
+		res << traffic[k].ukf.x_[0], traffic[k].ukf.x_[1],traffic[k].ukf.x_(2)*cos(traffic[k].ukf.x_(3)),traffic[k].ukf.x_(2)*sin(traffic[k].ukf.x_(3)),traffic[k].ukf.x_(3);
 		viewer->addText("Accuracy - RMSE:", 30, 300, 20, 1, 1, 1, "rmse");
 		VectorXd rmse = tools.CalculateRMSE(tools.estimations, tools.ground_truth);
 
