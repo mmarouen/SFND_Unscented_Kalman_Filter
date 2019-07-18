@@ -27,25 +27,27 @@ class UKF {
    * matrix
    * @param delta_t Time between k and k+1 in s
    */
-  void Prediction(double delta_t);
+  void PredictMotion(MeasurementPackage meas_package);
 
   /**
    * Updates the state and the state covariance matrix using a laser measurement
    * @param meas_package The measurement at k+1
    */
   void UpdateLidar(MeasurementPackage meas_package);
+  void ProcessLidarMeasurement(MeasurementPackage meas_package);
+  void PredictLidarMeasurement();
 
   /**
    * Updates the state and the state covariance matrix using a radar measurement
    * @param meas_package The measurement at k+1
    */
-  void UpdateRadar(MeasurementPackage meas_package);
   void GenerateSigmaPoints();
   void SigmaPointPrediction(double delta_t);
   void PredictMeanAndCovariance();
+
+  void ProcessRadarMeasurement(MeasurementPackage meas_package);
+  void PredictRadarMeasurement();
   void UpdateRadar(MeasurementPackage meas_package);
-  void ProcessRadarMeasurement();
-  void UKFRadar(MeasurementPackage meas_package);
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -64,6 +66,8 @@ class UKF {
   Eigen::MatrixXd P_;
   Eigen::MatrixXd S_;
   Eigen::MatrixXd Zsig_;
+  Eigen::MatrixXd H_;
+  Eigen::MatrixXd R_;
 
   // predicted sigma points matrix
   Eigen::MatrixXd Xsig_aug_;
@@ -72,6 +76,8 @@ class UKF {
 
   // time when the state is true, in us
   long long time_us_;
+
+  double dt_;
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
   double std_a_;

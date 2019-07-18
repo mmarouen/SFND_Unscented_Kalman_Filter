@@ -4,6 +4,11 @@
 #include "render/render.h"
 #include "sensors/lidar.h"
 #include "tools.h"
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
 
 class Highway
 {
@@ -20,7 +25,7 @@ public:
 	// Parameters 
 	// --------------------------------
 	// Set which cars to track with UKF
-	std::vector<bool> trackCars = {true,true,true};
+	std::vector<bool> trackCars = {true,false,false};
 	// Visualize sensor measurements
 	bool visualize_lidar = true;
 	bool visualize_radar = true;
@@ -130,9 +135,8 @@ public:
 				VectorXd gt(4);
 				gt << traffic[i].position.x, traffic[i].position.y, traffic[i].velocity*cos(traffic[i].angle), traffic[i].velocity*sin(traffic[i].angle);
 				tools.ground_truth.push_back(gt);
-				tools.lidarSense(traffic[i], viewer, timestamp, visualize_lidar,(double)1/frame_per_sec);
-				//traffic[i].ukf.predict();
-				tools.radarSense(traffic[i], egoCar, viewer, timestamp, visualize_radar,(double)1/frame_per_sec);
+				tools.lidarSense(traffic[i], viewer, timestamp, visualize_lidar);
+				tools.radarSense(traffic[i], egoCar, viewer, timestamp, visualize_radar);
 				tools.ukfResults(traffic[i],viewer, projectedTime, projectedSteps);
 				VectorXd estimate(4);
 				double v  = traffic[i].ukf.x_(2);
@@ -144,12 +148,17 @@ public:
 	
 			}
 		}
+		
+		VectorXd gt(4);
+		int k=0;
+		gt << traffic[k].position.x, traffic[k].position.y, traffic[k].velocity*cos(traffic[k].angle), traffic[k].velocity*sin(traffic[k].angle);
 		viewer->addText("Accuracy - RMSE:", 30, 300, 20, 1, 1, 1, "rmse");
 		VectorXd rmse = tools.CalculateRMSE(tools.estimations, tools.ground_truth);
-		viewer->addText(" X: "+std::to_string(rmse[0]), 30, 275, 20, 1, 1, 1, "rmse_x");
-		viewer->addText(" Y: "+std::to_string(rmse[1]), 30, 250, 20, 1, 1, 1, "rmse_y");
-		viewer->addText("Vx: "	+std::to_string(rmse[2]), 30, 225, 20, 1, 1, 1, "rmse_vx");
-		viewer->addText("Vy: "	+std::to_string(rmse[3]), 30, 200, 20, 1, 1, 1, "rmse_vy");
+
+		viewer->addText("X val/thd: "+std::to_string(rmse[0])+"/"+std::to_string(rmseThreshold[0])+"/"+std::to_string(gt(0)), 30, 275, 20, 1, 1, 1, "rmse_x");
+		viewer->addText("Y val/thd: "+std::to_string(rmse[1])+"/"+std::to_string(rmseThreshold[1])+"/"+std::to_string(gt(1)), 30, 250, 20, 1, 1, 1, "rmse_y");
+		viewer->addText("Vx val/thd: "	+std::to_string(rmse[2])+"/"+std::to_string(rmseThreshold[2])+"/"+std::to_string(gt(2)), 30, 225, 20, 1, 1, 1, "rmse_vx");
+		viewer->addText("Vy val/thd: "	+std::to_string(rmse[3])+"/"+std::to_string(rmseThreshold[3])+"/"+std::to_string(gt(3)), 30, 200, 20, 1, 1, 1, "rmse_vy");
 
 		if(timestamp > 1.0e6)
 		{
