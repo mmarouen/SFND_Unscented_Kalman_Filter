@@ -277,8 +277,8 @@ void UKF::ProcessLidarMeasurement(MeasurementPackage meas_package)
     0.0, std_laspy_*std_laspy_;
 
   PredictLidarMeasurement();
-  //UpdateLidar(meas_package);
-  UpdateRadar(meas_package);
+  UpdateLidar(meas_package);
+  //UpdateRadar(meas_package);
 
 }
 
