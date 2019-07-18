@@ -148,13 +148,6 @@ public:
 			}
 		}
 		
-		VectorXd gt(4);
-		VectorXd gt2(5);
-		int k=1;
-		gt << traffic[k].position.x, traffic[k].position.y, traffic[k].velocity*cos(traffic[k].angle), traffic[k].velocity*sin(traffic[k].angle);
-		gt2 << traffic[k].position.x, traffic[k].position.y, traffic[k].velocity*cos(traffic[k].angle), traffic[k].velocity*sin(traffic[k].angle), traffic[k].angle;
-		VectorXd res(5);
-		res << traffic[k].ukf.x_[0], traffic[k].ukf.x_[1],traffic[k].ukf.x_(2)*cos(traffic[k].ukf.x_(3)),traffic[k].ukf.x_(2)*sin(traffic[k].ukf.x_(3)),traffic[k].ukf.x_(3);
 		viewer->addText("Accuracy - RMSE:", 30, 300, 20, 1, 1, 1, "rmse");
 		VectorXd rmse = tools.CalculateRMSE(tools.estimations, tools.ground_truth);
 
