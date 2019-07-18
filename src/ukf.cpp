@@ -79,7 +79,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    * measurements.
    */
   if(!is_initialized_){
-    std::cout<<"init"<<std::endl;
     //use first reading as initialization
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       double rho = meas_package.raw_measurements_[0];

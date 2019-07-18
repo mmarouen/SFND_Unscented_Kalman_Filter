@@ -150,11 +150,10 @@ public:
 		
 		viewer->addText("Accuracy - RMSE:", 30, 300, 20, 1, 1, 1, "rmse");
 		VectorXd rmse = tools.CalculateRMSE(tools.estimations, tools.ground_truth);
-
-		viewer->addText("X val/thd: "+std::to_string(rmse[0])+"/"+std::to_string(rmseThreshold[0])+"/"+std::to_string(gt(0)), 30, 275, 20, 1, 1, 1, "rmse_x");
-		viewer->addText("Y val/thd: "+std::to_string(rmse[1])+"/"+std::to_string(rmseThreshold[1])+"/"+std::to_string(gt(1)), 30, 250, 20, 1, 1, 1, "rmse_y");
-		viewer->addText("Vx val/thd: "	+std::to_string(rmse[2])+"/"+std::to_string(rmseThreshold[2])+"/"+std::to_string(gt(2)), 30, 225, 20, 1, 1, 1, "rmse_vx");
-		viewer->addText("Vy val/thd: "	+std::to_string(rmse[3])+"/"+std::to_string(rmseThreshold[3])+"/"+std::to_string(gt(3)), 30, 200, 20, 1, 1, 1, "rmse_vy");
+		viewer->addText(" X: "+std::to_string(rmse[0]), 30, 275, 20, 1, 1, 1, "rmse_x");
+		viewer->addText(" Y: "+std::to_string(rmse[1]), 30, 250, 20, 1, 1, 1, "rmse_y");
+		viewer->addText("Vx: "	+std::to_string(rmse[2]), 30, 225, 20, 1, 1, 1, "rmse_vx");
+		viewer->addText("Vy: "	+std::to_string(rmse[3]), 30, 200, 20, 1, 1, 1, "rmse_vy");
 
 		if(timestamp > 1.0e6)
 		{
